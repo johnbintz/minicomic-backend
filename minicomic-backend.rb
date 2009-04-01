@@ -416,6 +416,11 @@ if !ARGV[0]
   exit 0
 end
 
+if !File.exists?(ARGV[0])
+  puts "#{ARGV[0]} doesn't exist!"
+  exit 1
+end
+
 config = YAML::load(File.open(ARGV[0], "r"))
 global = config['Global']
 
