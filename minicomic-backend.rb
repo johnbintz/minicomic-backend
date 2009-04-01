@@ -556,9 +556,11 @@ files.each do |filename|
             rebuild = true
           else
             [ filename ].flatten.each do |f|
-              if File.mtime(f) > File.mtime(t)
-                rebuild = true
-              end          
+              if File.basename(f) != "blank"
+                if File.mtime(f) > File.mtime(t)
+                  rebuild = true
+                end          
+              end
             end
           end
         end            
