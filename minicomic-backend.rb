@@ -411,6 +411,11 @@ end
 any_rebuilt = false
 any_rsync = false
 
+if !ARGV[0]
+  puts "Usage: #{File.basename(__FILE__)} <path to YAML file>"
+  exit 0
+end
+
 config = YAML::load(File.open(ARGV[0], "r"))
 global = config['Global']
 
