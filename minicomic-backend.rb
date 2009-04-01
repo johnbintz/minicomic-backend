@@ -24,11 +24,16 @@ class Filter
 
   def recalc_pixels
     if @config['print']
-      if @config['width_inches'] && @config['width_inches'] != 0
-        @config['width'] = @config['width_inches'].to_i * @config['dpi'].to_i
+      if !@config['dpi']; raise "DPI not defined"; end
+      if @config['width_inches'] && (@config['width_inches'].to_f != 0)
+        @config['width'] = (@config['width_inches'].to_f * @config['dpi'].to_f).to_i
+      else
+        @config.delete('width')
       end
-      if @config['height_inches'] && @config['height_inches'] != 0
-        @config['height'] = @config['height_inches'].to_i * @config['dpi'].to_i
+      if @config['height_inches'] && (@config['height_inches'].to_f != 0)
+        @config['height'] = (@config['height_inches'].to_f * @config['dpi'].to_f).to_i
+      else
+        @config.delete('height')
       end  
     end
   end
@@ -60,9 +65,9 @@ class Filter
       end
     end
 
-    if width; params << "-w #{width} "; end
-    if height; params << "-h #{height} "; end
-
+    if width && (width.to_i != 0); params << "-w #{width} "; end
+    if height && (height.to_i != 0); params << "-h #{height} "; end
+    
     system("inkscape -e \"#{inkscape_target}\" -y 1.0 #{params.join(" ")} \"#{input}\"")    
     
     if @config['rotate']
