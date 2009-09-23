@@ -76,7 +76,12 @@ module PrintHandling
     end
 
     command << "-draw 'image Over 0,0 0,0 \"#{input}\"'"
-    command << "\"#{output}\""
+
+    if output[0,1] == "|"
+      command << output[1..-1]
+    else
+      command << "\"#{output}\""
+    end
     
     convert(command)
   end
@@ -166,7 +171,7 @@ class SVGToTempBitmap < InputFilter
       x_offset = (grid_width - image_width) / 2
       y_offset = (grid_height - image_height) / 2
       
-      command << "-draw 'image Over #{x * grid_width + x_offset},#{y * grid_height + y_offset} 0,0 \"#{file}\"'"
+      command << "\"#{file}\" -geometry +#{x * grid_width + x_offset}+#{y * grid_height + y_offset} -composite"
     end
     
     command << OutputFilename
@@ -268,10 +273,7 @@ end
 class TempBitmapToPrint < OutputFilter
   include PrintHandling
   def build(input, output)
-    build_for_print(input, "tmp2.pbm")
-
-    system("sam2p -c:lzw -m:dpi:#{(72.0 * (72.0 / @config['dpi'].to_f))} tmp2.pbm PDF:\"#{output}\"");
-    system("rm tmp2.pbm")  
+    build_for_print(input, "| pbm:- | sam2p -c:lzw -m:dpi:#{(72.0 * (72.0 / @config['dpi'].to_f))} - PDF:\"#{output}\"")
   end
 end
 
@@ -293,8 +295,7 @@ class TempBitmapToPaginatedPrint < OutputFilter
     
     commands = [
         "-size #{page_width * 2}x#{page_height}",
-        "xc:white",
-        "-gravity Northwest"
+        "xc:white"
     ]
     
     left_creep = 0
@@ -307,16 +308,14 @@ class TempBitmapToPaginatedPrint < OutputFilter
     end
     
     if left
-      commands << "-draw 'image Over -#{left_creep.to_i},0 0,0 \"#{left}\"'"
+      commands << "\"#{left}\" -geometry +#{left_creep.to_i}+0 -composite"
     end
     if right
-      commands << "-draw 'image Over #{(page_width + right_creep).to_i},0 0,0 \"#{right}\"'"
+      commands << "\"#{right}\" -geometry +#{(page_width + right_creep).to_i}+0 -composite"
     end
-    commands << "-channel RGB -depth 8 tmp2.png"
+    commands << "-colorspace RGB -depth 8 pnm:- | sam2p -c:lzw -m:dpi:#{(72.0 * (72.0 / @config['dpi'].to_f))} - PDF:\"#{output}\""
 
     convert(commands)
-    system("sam2p -c:lzw -m:dpi:#{(72.0 * (72.0 / @config['dpi'].to_f))} tmp2.png PDF:\"#{output}\"");
-    system("rm tmp2.png")
   end
 end
 

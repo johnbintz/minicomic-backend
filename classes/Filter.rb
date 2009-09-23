@@ -84,6 +84,9 @@ class Filter
   end
 
   def convert(command, verbose = false)
+    if verbose
+      puts "convert " + (verbose ? "-verbose " : "" ) + [ command ].flatten.join(" ")
+    end
     system("convert " + (verbose ? "-verbose " : "" ) + [ command ].flatten.join(" "))
   end
 
