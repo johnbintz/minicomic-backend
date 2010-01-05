@@ -22,7 +22,7 @@ class Scheduler
   def ok_to_add(date, breaks)
     ok = true
     breaks.each do |i|
-      if (i[:from] <= date) && (i[:to] >= date)
+      if (i['from'] <= date) && (i['to'] >= date)
         ok = false
       end
     end
@@ -32,13 +32,13 @@ class Scheduler
   def schedule(parameters, to_produce)
     dates = []
 
-    if parameters[:start]
-      current = parameters[:start]
+    if parameters['start']
+      current = parameters['start']
 
-      breaks = parameters[:breaks] || []
+      breaks = parameters['breaks'] || []
 
       while dates.length < to_produce
-        interval = parameters[:interval].shift
+        interval = parameters['interval'].shift
 
         case interval.class.to_s
           when 'String'
@@ -57,7 +57,7 @@ class Scheduler
             current += interval
         end
 
-        parameters[:interval] << interval
+        parameters['interval'] << interval
       end
     end
 

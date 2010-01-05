@@ -13,26 +13,26 @@ class TestScheduler < Test::Unit::TestCase
     [
       [
         {
-          :start => DateTime.parse('2010-01-01'),
-          :interval => Scheduler::WEEKLY
+          'start' => DateTime.parse('2010-01-01'),
+          'interval' => Scheduler::WEEKLY
         },
         2,
         [ DateTime.parse('2010-01-01'), DateTime.parse('2010-01-08') ]
       ],
       [
         {
-          :start => DateTime.parse('2010-01-01'),
-          :interval => [ 'monday' ]
+          'start' => DateTime.parse('2010-01-01'),
+          'interval' => [ 'monday' ]
         },
         2,
         [ DateTime.parse('2010-01-04'), DateTime.parse('2010-01-11') ]
       ],
       [
         {
-          :start => DateTime.parse('2010-01-01'),
-          :interval => Scheduler::DAILY,
-          :breaks => [
-            { :from => DateTime.parse('2010-01-03'), :to => DateTime.parse('2010-01-05') }
+          'start' => DateTime.parse('2010-01-01'),
+          'interval' => Scheduler::DAILY,
+          'breaks' => [
+            { 'from' => DateTime.parse('2010-01-03'), 'to' => DateTime.parse('2010-01-05') }
           ]
         },
         4,
