@@ -50,26 +50,25 @@ class Scheduler
       while dates.length < to_produce
         interval = parameters['interval'].shift
 
-        case interval.class.to_s
-          when 'String'
-            current = skip_to_dow(current, interval)
+        what_to_add = nil
 
-            if ok_to_add(current, index, prior, breaks)
-              dates << current
-              prior = current
-              index += 1
-            end
+        if interval.is_a? String
+          current = skip_to_dow(current, interval)
 
-            current += 1
-          when 'Fixnum'
-            if ok_to_add(current, index, prior, breaks)
-              dates << current
-              prior = current
-              index += 1
-            end
-
-            current += interval
+          what_to_add = 1
         end
+
+        if ok_to_add(current, index, prior, breaks)
+          dates << current
+          prior = current
+          index += 1
+        end
+
+        if interval.is_a? Fixnum
+          what_to_add = interval
+        end
+
+        current += what_to_add
 
         parameters['interval'] << interval
       end
