@@ -22,7 +22,7 @@ class TestScheduler < Test::Unit::TestCase
       [
         {
           :start => DateTime.parse('2010-01-01'),
-          :interval => [ :mondays ]
+          :interval => [ 'monday' ]
         },
         2,
         [ DateTime.parse('2010-01-04'), DateTime.parse('2010-01-11') ]
@@ -32,4 +32,8 @@ class TestScheduler < Test::Unit::TestCase
     end
   end
 
+  def test_skip_to_dow
+    assert_equal DateTime.parse('2010-01-02'), @scheduler.skip_to_dow(DateTime.parse('2010-01-01'), 6)
+    assert_equal DateTime.parse('2010-01-02'), @scheduler.skip_to_dow(DateTime.parse('2010-01-01'), 'saturday')
+  end
 end
