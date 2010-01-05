@@ -1,4 +1,5 @@
 *~
 .loadpath
 .project
-
+.DS_Store
+coverage/

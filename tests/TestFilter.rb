@@ -1,11 +1,11 @@
 require 'rubygems'
 require 'test/unit'
-require 'mockfs/override'
+require 'fakefs/safe'
 require File.dirname(__FILE__) + '/../classes/Filter.rb'
 
 class TestFilter < Test::Unit::TestCase
   def setup
-    @filter = Filter.instance
+    @filter = Filter.new
   end
 
   def test_recalc_pixels
@@ -41,5 +41,34 @@ class TestFilter < Test::Unit::TestCase
       }
       assert_equal(10, @filter.config['width'])
     end
+
+    @filter.config = {
+      'print' => true,
+      'dpi' => 10,
+      'width_inches' => 1,
+      'height_inches' => 2
+    }
+    assert_equal(10, @filter.config['width'])
+    assert_equal(20, @filter.config['height'])
+  end
+
+  def test_cleanup
+    @filter.cleanup = [ 'test', 'test2', 'test3' ]
+    FakeFS do
+      FileUtils.touch [ 'test', 'test3', 'test4' ]
+      @filter.cleanup
+
+      [ 'test', 'test2', 'test3' ].each do |file|
+        assert !(File.exists? file)
+      end
+
+      [ 'test4' ].each do |file|
+        assert File.exists? file
+      end
+    end
+  end
+
+  def test_get_dimensions
+    assert_equal [ 50, 75 ], @filter.get_dimensions(File.dirname(__FILE__) + '/data/test_dimensions.png')
   end
 end
