@@ -38,6 +38,20 @@ class TestScheduler < Test::Unit::TestCase
         4,
         [ DateTime.parse('2010-01-01'), DateTime.parse('2010-01-02'), DateTime.parse('2010-01-06'), DateTime.parse('2010-01-07') ]
       ],
+      [
+        {
+          'start' => DateTime.parse('2010-01-01'),
+          'interval' => [ 'monday', 'wednesday', 'friday' ],
+          'breaks' => [
+            { 'at_index' => 3, 'for_days' => 7 }
+          ]
+        },
+        6,
+        [
+          DateTime.parse('2010-01-04'), DateTime.parse('2010-01-06'), DateTime.parse('2010-01-08'),
+          DateTime.parse('2010-01-18'), DateTime.parse('2010-01-20'), DateTime.parse('2010-01-22')
+        ]
+      ],
     ].each do |parameters, to_produce, expected_results|
       assert_equal expected_results, @scheduler.schedule(parameters, to_produce)
     end
