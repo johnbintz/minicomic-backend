@@ -1,19 +1,16 @@
-require 'singleton'
-
 class Filter
-  include Singleton
   @config = {}
   @cleanup = []
 
   attr_accessor :config, :cleanup
-  
+
   def initialize
     @config = {}
     @cleanup = []
   end
 
   def cleanup
-    @cleanup.each do |f| 
+    @cleanup.each do |f|
       if File.exists? f; File.unlink(f); end
     end
   end
@@ -31,8 +28,8 @@ class Filter
         @config['height'] = (@config['height_inches'].to_f * @config['dpi'].to_f).to_i
       else
         @config.delete('height')
-      end 
-      
+      end
+
       if (!@config['width'] && !@config['height'])
         raise "No dimensions defined!"
       end
@@ -44,7 +41,7 @@ class Filter
   #
   def config=(c)
     @config = c
-    
+
     recalc_pixels
   end
 
@@ -57,7 +54,7 @@ class Filter
     width = @config['width']
     height = @config['height']
     inkscape_target = target
-    
+
     if @config['rotate']
       case @config['rotate']
         when 90, -90
@@ -68,16 +65,16 @@ class Filter
 
     if width && (width.to_i != 0); params << "-w #{width} "; end
     if height && (height.to_i != 0); params << "-h #{height} "; end
-    
-    system("inkscape -e \"#{inkscape_target}\" -y 1.0 #{params.join(" ")} \"#{input}\"")    
-    
+
+    system("inkscape -e \"#{inkscape_target}\" -y 1.0 #{params.join(" ")} \"#{input}\"")
+
     if @config['rotate']
       command = [
         "\"#{inkscape_target}\"",
         "-rotate #{@config['rotate']}",
         "\"#{target}\""
       ]
-      
+
       convert(command)
       File.unlink(inkscape_target)
     end

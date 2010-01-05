@@ -1,5 +1,3 @@
-#!/usr/bin/ruby
-
 require 'rubygems'
 require 'test/unit'
 require 'mockfs/override'
@@ -28,7 +26,7 @@ class TestFilter < Test::Unit::TestCase
         'dpi' => 10
       }
     end
-    
+
     [ 'width', 'height' ].each do |dim|
       assert_raise RuntimeError do
         @filter.config = {
