@@ -4,6 +4,7 @@ class Scheduler
   include Singleton
 
   WEEKLY = [ 7 ]
+  DAILY  = [ 1 ]
 
   def skip_to_dow(date, dow)
     if dow.is_a? String
@@ -18,24 +19,40 @@ class Scheduler
     date
   end
 
+  def ok_to_add(date, breaks)
+    ok = true
+    breaks.each do |i|
+      if (i[:from] <= date) && (i[:to] >= date)
+        ok = false
+      end
+    end
+    ok
+  end
+
   def schedule(parameters, to_produce)
     dates = []
 
     if parameters[:start]
       current = parameters[:start]
 
-      1.upto(to_produce) do |i|
+      breaks = parameters[:breaks] || []
+
+      while dates.length < to_produce
         interval = parameters[:interval].shift
 
         case interval.class.to_s
           when 'String'
             current = skip_to_dow(current, interval)
 
-            dates << current
+            if ok_to_add(current, breaks)
+              dates << current
+            end
 
             current += 1
           when 'Fixnum'
-            dates << current
+            if ok_to_add(current, breaks)
+              dates << current
+            end
 
             current += interval
         end

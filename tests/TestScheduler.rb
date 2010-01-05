@@ -27,6 +27,17 @@ class TestScheduler < Test::Unit::TestCase
         2,
         [ DateTime.parse('2010-01-04'), DateTime.parse('2010-01-11') ]
       ],
+      [
+        {
+          :start => DateTime.parse('2010-01-01'),
+          :interval => Scheduler::DAILY,
+          :breaks => [
+            { :from => DateTime.parse('2010-01-03'), :to => DateTime.parse('2010-01-05') }
+          ]
+        },
+        4,
+        [ DateTime.parse('2010-01-01'), DateTime.parse('2010-01-02'), DateTime.parse('2010-01-06'), DateTime.parse('2010-01-07') ]
+      ],
     ].each do |parameters, to_produce, expected_results|
       assert_equal expected_results, @scheduler.schedule(parameters, to_produce)
     end
