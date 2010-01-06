@@ -26,4 +26,30 @@ class TestPrintHandling < Test::Unit::TestCase
       assert_equal expected_return, @instance.calculate_page_size
     end
   end
+
+  def test_build_for_print
+    @instance.stubs(:calculate_page_size).returns([10, 20])
+    @instance.config = { 'dpi' => 100 }
+    [
+      [ 'none', 'Center' ],
+      [ 'left', 'East' ],
+      [ 'right', 'West' ]
+    ].each do |side, gravity|
+      [
+        [ '|pipe', 'pipe' ],
+        [ 'nopipe', '"nopipe"' ]
+      ].each do |output, expected_filename|
+        @instance.expects(:convert).with([
+          '-density 100',
+          '-size 10x20',
+          'xc:white',
+          "-gravity #{gravity}",
+          "-draw 'image Over 0,0 0,0 \"input\"'",
+          expected_filename
+        ])
+
+        @instance.build_for_print('input', output, side)
+      end
+    end
+  end
 end

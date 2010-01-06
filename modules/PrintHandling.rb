@@ -43,7 +43,7 @@ module PrintHandling
   def build_for_print(input, output, side = "none")
     page_width, page_height = calculate_page_size
     command = [
-      "-density #{config['dpi']}",
+      "-density #{@config['dpi']}",
       "-size #{page_width.to_i}x#{page_height.to_i}",
       "xc:white"
     ]
