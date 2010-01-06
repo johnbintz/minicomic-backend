@@ -1,7 +1,7 @@
 .PHONY : test test-coverage
 
 test :
-	testrb -b tests/*.rb
+	testrb `find tests -name '*.rb'`
 
 test-coverage :
-	rcov -x '\/jruby\/lib\/' -x '\/tests\/data\/' tests/*.rb
+	rcov -x '\/jruby\/lib\/' -x '\/tests\/data\/' `find tests -name '*.rb'`

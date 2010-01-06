@@ -32,6 +32,10 @@ module ImageProcessing
 
     call_system("inkscape -e \"#{inkscape_target}\" -y 1.0 #{params.join(" ")} \"#{input}\"")
 
+    handle_inkscape_rotation(inkscape_target, target)
+  end
+
+  def handle_inkscape_rotation(inkscape_target, target)
     if @config['rotate']
       command = [
         "\"#{inkscape_target}\"",
