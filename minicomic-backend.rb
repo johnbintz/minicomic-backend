@@ -8,48 +8,6 @@ Dir[File.dirname(__FILE__) + "/classes/*.rb"].each do |file|
 end
 
 #
-# Process an input file for the Web
-#
-class TempBitmapToWeb < OutputFilter
-  def build(input, output)
-    quality = @config['quality'] ? @config['quality'] : 80
-    convert("\"#{input}\" -quality #{quality} \"#{output}\"")
-  end
-
-  def filename(info)
-    if !@config['start_date']; raise "Must define a start date!"; end
-    if !@config['period']; raise "Must define a period!"; end
-
-    index = info['index'].to_i
-    if index == 0 && @config['announce_date']
-      comic_date = @config['announce_date']
-    else
-      day_of_week = 0
-      weeks_from_start = 0
-
-      case @config['period']
-        when "daily"
-          day_of_week = index % 5
-          weeks_from_start = (index / 5).floor
-        when "weekly"
-          weeks_from_start = index
-      end
-
-      if @config['delay_at_index'] && @config['delay_length_weeks']
-        if index >= @config['delay_at_index']
-          weeks_from_start += @config['delay_length_weeks']
-        end
-      end
-
-      comic_date = Time.parse(@config['start_date']) + ((((day_of_week + weeks_from_start * 7) * 24) + 6) * 60 * 60)
-    end
-
-    info['date'] = comic_date.strftime("%Y-%m-%d")
-    super(info)
-  end
-end
-
-#
 # Code to help with pagination
 #
 module Pagination
