@@ -14,7 +14,7 @@ class SVGToTempBitmap < InputFilter
   # process a single input file, possibly splitting it into two output files if it's a spread
   #
   def single(input)
-    filename = Dir.pwd + '/' + OutputFilename
+    filename = Dir.pwd + '/' + @output_filename
     inkscape(input, filename)
     @cleanup << filename
 
@@ -24,7 +24,7 @@ class SVGToTempBitmap < InputFilter
       return targets
     end
 
-    return filename
+    filename
   end
 
   def build_spread(filename)
@@ -46,7 +46,7 @@ class SVGToTempBitmap < InputFilter
       targets << target
     end
 
-    return targets
+    targets
   end
 
   #
@@ -58,32 +58,53 @@ class SVGToTempBitmap < InputFilter
     if @config['spread']; raise "Spreads and grids combined do not make sense"; end
 
     width, height = @config['grid'].split("x").collect { |f| f.to_f }
-    joined_files = []
 
     page_width, page_height = calculate_page_size
 
     grid_width = page_width / width
     grid_height = page_height / height
 
-    0.upto(files.length - 1) do |i|
-      x = i % width
-      y = (i / width).floor
-
-      if files[i].split('/').last != "blank"
-        tmp_svg_output = OutputFilename + "-#{i}.png"
-        inkscape(Dir.pwd + '/' + files[i], tmp_svg_output)
-
-        joined_files << [ tmp_svg_output, x, y ]
-        @cleanup << tmp_svg_output
-      end
-    end
+    joined_files = join_files(files, width)
 
     command = [
       "-size #{page_width}x#{page_height}",
       "xc:white"
     ]
 
-    joined_files.each do |file, x, y|
+    command.concat generate_joined_files_command(joined_files, grid_width, grid_height)
+
+    command << "\"#{@output_filename}\""
+
+    convert(command)
+
+    @cleanup.concat joined_files.collect { |file, x, y| file }
+    @cleanup << @output_filename
+
+    @output_filename
+  end
+
+  def join_files(files, width)
+    joined_files = []
+
+    files.each_index do |i|
+      x = i % width
+      y = (i / width).floor
+
+      if files[i].split('/').last != "blank"
+        tmp_file = @output_filename + "-#{i}.png"
+        inkscape(Dir.pwd + '/' + files[i], tmp_file)
+
+        joined_files << [ tmp_file, x, y ]
+      end
+    end
+
+    joined_files
+  end
+
+  def generate_joined_files_command(files, grid_width, grid_height)
+    command = []
+
+    files.each do |file, x, y|
       image_width, image_height = get_dimensions(file)
 
       x_offset = (grid_width - image_width) / 2
@@ -92,11 +113,6 @@ class SVGToTempBitmap < InputFilter
       command << "\"#{file}\" -geometry +#{x * grid_width + x_offset}+#{y * grid_height + y_offset} -composite"
     end
 
-    command << OutputFilename
-
-    convert(command)
-
-    @cleanup << OutputFilename
-    OutputFilename
+    command
   end
 end
