@@ -1,29 +1,19 @@
 class FileProcessor
+  attr_accessor :config, :paginated_source_files, :page_index
+
+  def initialize(config)
+    @page_index = 0
+    @config = config
+    @paginated_source_files = {}
+  end
+
+
   def process
 
-    paginated_source_files = {}
     rsync_files_by_target = {}
 
     files.each do |filename|
-      ok = true; matches = nil; fileinfo = {}
-
-      if filename.instance_of? Hash
-        if filename['blank']
-          ok = false
-          config.each do |type, info|
-            if info['is_paginated']
-              if !paginated_source_files[type]; paginated_source_files[type] = []; end
-              paginated_source_files[type] << nil
-            end
-          end
-          page_index += 1
-        else
-          fileinfo = filename
-          filename = fileinfo['file']
-        end
-      else
-        if re; ok = matches = re.match(filename); end
-      end
+      ok, fileinfo, filename = verify_filename(filename)
 
       if ok
         filename_display = (filename.instance_of? Array) ? filename.join(", ") : filename
@@ -31,11 +21,11 @@ class FileProcessor
         puts "Examining #{filename_display}..."
 
         filename_parts = {
-          'page_index' => sprintf(page_index_format, page_index)
+          'page_index' => sprintf(page_index_format, @page_index)
         }
 
-        if matches
-          all, index, title = matches.to_a
+        if @config['Global']['match']
+          all, index, title = ok.to_a
         else
           index = page_index - 1
           title = ""
@@ -152,4 +142,38 @@ class FileProcessor
     end
   end
 
+  def verify_filename(filename)
+    ok = true
+    fileinfo = {}
+
+    if filename.instance_of? Hash
+      if filename['blank']
+        ok = false
+        @config.each do |type, info|
+          if info['is_paginated']
+            if !@paginated_source_files[type]
+              @paginated_source_files[type] = []
+            end
+            @paginated_source_files[type] << nil
+          end
+        end
+        @page_index += 1
+      else
+        if filename['file']
+          fileinfo = filename
+          filename = fileinfo['file']
+        else
+          ok = false
+        end
+      end
+    else
+      if @config['Global']
+        if @config['Global']['match']
+          ok = Regexp.new(@config['Global']['match']).match(filename)
+        end
+      end
+    end
+
+    [ ok, fileinfo, filename ]
+  end
 end

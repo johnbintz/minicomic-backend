@@ -20,8 +20,6 @@ class ConfigLoader
     fileinfo_by_file = {}
 
     if global['pages']
-      re = nil
-
       files = global['pages'].collect do |f|
         result = nil
         case f.class.to_s
