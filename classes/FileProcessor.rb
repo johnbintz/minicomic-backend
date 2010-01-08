@@ -9,7 +9,6 @@ class FileProcessor
 
 
   def process
-
     rsync_files_by_target = {}
 
     files.each do |filename|
@@ -20,21 +19,6 @@ class FileProcessor
 
         puts "Examining #{filename_display}..."
 
-        filename_parts = {
-          'page_index' => sprintf(page_index_format, @page_index)
-        }
-
-        if @config['Global']['match']
-          all, index, title = ok.to_a
-        else
-          index = page_index - 1
-          title = ""
-        end
-
-        if global['title']; title = global['title'].gsub("{index}", index).gsub("{title}", title); end
-        filename_parts['index'] = index
-        filename_parts['title'] = title
-
         config.each do |type, info|
           if type != "Global"
             input = nil; output = nil
@@ -43,34 +27,9 @@ class FileProcessor
 
             file_fileinfo = (fileinfo_by_file[fileinfo_key]) ? fileinfo_by_file[fileinfo_key] : {}
 
-            extension = File.extname((filename.instance_of? Array) ? filename[0] : filename).downcase
+            file_fileinfo = info.dup.merge(fileinfo).merge(file_fileinfo)
 
-            case extension
-              when ".svg"
-                case File.extname(config[type]['target']).downcase
-                  when ".jpg", ".jpeg", ".png", ".gif"
-                    input = SVGToTempBitmap
-                    output = TempBitmapToWeb
-                  when ".pdf"
-                    input = SVGToTempBitmap
-                    output = (info['is_paginated']) ? TempBitmapToPaginatedPrint : TempBitmapToPrint
-                end
-            end
-
-            if !input;  raise "No input handler for #{extension} defined"; end
-            if !output; raise "No output handler for #{File.extname(config[type]['target']).downcase} defined"; end
-
-            input_obj = input.instance
-            input_obj.config = info.dup.merge(fileinfo).merge(file_fileinfo)
-
-            output_obj = output.instance
-            output_obj.config = info.dup.merge(fileinfo).merge(file_fileinfo)
-
-            if info['is_paginated']
-              output_obj.config['target'] += "-{page_index}.png"
-            end
-
-            targets = output_obj.targets(filename_parts)
+            input_obj, output_obj, targets = construct_filters_and_targets(filename, file_fileinfo, ok)
 
             rebuild = false
 
@@ -175,5 +134,60 @@ class FileProcessor
     end
 
     [ ok, fileinfo, filename ]
+  end
+
+  def build_filename_parts(match_data)
+    filename_parts = {
+      'page_index' => sprintf(@config['Global']['page_index_format'], @page_index)
+    }
+
+    if match_data.is_a? MatchData
+      all, index, title = match_data.to_a
+    else
+      index = @page_index - 1
+      title = ""
+    end
+
+    if @config['Global']['title']
+      title = @config['Global']['title'].gsub("{index}", index).gsub("{title}", title)
+    end
+
+    filename_parts['index'] = index.to_i
+    filename_parts['title'] = title
+
+    filename_parts
+  end
+
+  def construct_filters_and_targets(filename, info, match_data)
+    extension = File.extname((filename.instance_of? Array) ? filename[0] : filename).downcase
+
+    case extension
+      when ".svg"
+        case File.extname(info['target']).downcase
+          when ".jpg", ".jpeg", ".png", ".gif"
+            input = SVGToTempBitmap
+            output = TempBitmapToWeb
+          when ".pdf"
+            input = SVGToTempBitmap
+            output = (info['is_paginated']) ? TempBitmapToPaginatedPrint : TempBitmapToPrint
+        end
+    end
+
+    if !input;  raise "No input handler for #{extension} defined"; end
+    if !output; raise "No output handler for #{File.extname(info['target']).downcase} defined"; end
+
+    input_obj = input.new
+    input_obj.config = info
+
+    output_obj = output.new
+    output_obj.config = info
+
+    if info['is_paginated']
+      output_obj.config['target'] += "-{page_index}.png"
+    end
+
+    targets = output_obj.targets(build_filename_parts(match_data))
+
+    [ input_obj, output_obj, targets ]
   end
 end
