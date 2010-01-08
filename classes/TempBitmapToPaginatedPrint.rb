@@ -1,3 +1,6 @@
+require File.dirname(__FILE__) + '/OutputFilter.rb'
+require File.dirname(__FILE__) + '/../modules/PrintHandling.rb'
+require File.dirname(__FILE__) + '/../modules/Pagination.rb'
 
 #
 # Convert bitmap files to a paginated print-ready file

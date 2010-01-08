@@ -1,6 +1,8 @@
 require 'rubygems'
 require 'test/unit'
-require File.dirname(__FILE__) + '/../classes/FileProcessor.rb'
+Dir[File.dirname(__FILE__) + '/../classes/*'].each do |f|
+  require f
+end
 
 class TestFileProcessor < Test::Unit::TestCase
   def test_verify_filename
@@ -79,6 +81,38 @@ class TestFileProcessor < Test::Unit::TestCase
   end
 
   def test_construct_filters_and_targets
+    match_data = 'test'
 
+    [
+      [
+        'test.svg',
+        { 'target' => 'test.png' },
+        'test',
+        [ SVGToTempBitmap, TempBitmapToWeb, 'target' ]
+      ],
+      [
+        'test.svg',
+        { 'target' => 'test.pdf' },
+        'test',
+        [ SVGToTempBitmap, TempBitmapToPrint, 'target' ]
+      ],
+      [
+        'test.svg',
+        { 'target' => 'test.pdf', 'is_paginated' => true },
+        'test',
+        [ SVGToTempBitmap, TempBitmapToPaginatedPrint, 'target' ]
+      ],
+    ].each do |filename, info, match_data, expected_return|
+      file_processor = FileProcessor.new({})
+      file_processor.expects(:build_filename_parts).with(match_data).returns('parts')
+
+      expected_return[0..1].each do |m|
+        m.any_instance.stubs(:recalc_pixels)
+      end
+
+      expected_return[1].any_instance.expects(:targets).with('parts').returns('target')
+
+      file_processor.construct_filters_and_targets(filename, info, match_data)
+    end
   end
 end

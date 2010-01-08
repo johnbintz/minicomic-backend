@@ -1,3 +1,5 @@
+require File.dirname(__FILE__) + '/Scheduler.rb'
+
 class ConfigLoader
   def load(file)
     config = load_yaml(file)
@@ -60,6 +62,15 @@ class ConfigLoader
     global['fileinfo_by_file'] = fileinfo_by_file
 
     config['Global'] = global
+
+    scheduler = Scheduler.instance
+    config.each do |type, info|
+      if type != "Global"
+        if info['schedule']
+          info['publish_dates'] = scheduler.schedule(info['schedule'], files.length)
+        end
+      end
+    end
 
     config
   end

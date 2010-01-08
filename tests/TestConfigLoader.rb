@@ -1,6 +1,8 @@
 require 'rubygems'
 require 'test/unit'
+require 'mocha'
 require File.dirname(__FILE__) + '/../classes/ConfigLoader.rb'
+require File.dirname(__FILE__) + '/../classes/Scheduler.rb'
 
 class TestConfigLoader < Test::Unit::TestCase
   def setup
@@ -36,6 +38,9 @@ class TestConfigLoader < Test::Unit::TestCase
             'path' => '*.svg',
             'match' => '.*\.svg',
             'page_index_format' => '%02d'
+          },
+          'Web' => {
+            'schedule' => 'schedule'
           }
         },
         {
@@ -45,6 +50,10 @@ class TestConfigLoader < Test::Unit::TestCase
             'page_index_format' => '%02d',
             'files' => [ Dir.pwd + '/test1.svg', Dir.pwd + '/test2.svg' ],
             'fileinfo_by_file' => {}
+          },
+          'Web' => {
+            'schedule' => 'schedule',
+            'publish_dates' => 'schedule'
           }
         },
         [],
@@ -142,6 +151,14 @@ class TestConfigLoader < Test::Unit::TestCase
       ],
     ].each do |yaml, expected_result, expectations, files|
       @config_loader.expects(:load_yaml).with('file').returns(yaml)
+
+      yaml.each do |type, info|
+        if type != "Global"
+          if info['schedule']
+            Scheduler.any_instance.expects(:schedule).with(info['schedule'], expected_result['Global']['files'].length).returns('schedule')
+          end
+        end
+      end
 
       if expectations
         expectations.each do |expectation|

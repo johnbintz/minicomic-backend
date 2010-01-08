@@ -1,3 +1,4 @@
+require File.dirname(__FILE__) + '/../modules/PrintHandling.rb'
 require File.dirname(__FILE__) + '/InputFilter.rb'
 
 class SVGToTempBitmap < InputFilter
