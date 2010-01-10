@@ -21,8 +21,6 @@ class FileProcessor
 
         config.each do |type, info|
           if type != "Global"
-            input = nil; output = nil
-
             fileinfo_key = (filename.instance_of? Array) ? filename.join(",") : filename
 
             file_fileinfo = (fileinfo_by_file[fileinfo_key]) ? fileinfo_by_file[fileinfo_key] : {}
@@ -31,52 +29,18 @@ class FileProcessor
 
             input_obj, output_obj, targets = construct_filters_and_targets(filename, file_fileinfo, ok)
 
-            rebuild = false
-
-            [ targets ].flatten.each do |t|
-              if !File.exists?(t)
-                rebuild = true
-              else
-                [ filename ].flatten.each do |f|
-                  if File.basename(f) != "blank"
-                    if File.mtime(f) > File.mtime(t)
-                      rebuild = true
-                    end
-                  end
-                end
-              end
-            end
-
-            if rebuild
+            if determine_rebuild(targets, filename)
               any_rebuilt = true
 
               puts "Rebuilding #{filename_display} (#{type})..."
               puts "  Using #{filename} as a source"
               puts "  and writing to #{targets.inspect}"
 
-              tmp_files = input_obj.build(filename)
-
-              output_files = []
-              case tmp_files.class.to_s
-                when "String"
-                  output_obj.build(tmp_files, targets)
-                  output_files << targets
-                when "Array"
-                  [0,1].each do |i|
-                    output_obj.build(tmp_files[i], targets[i], (i == 0) ? "left" : "right")
-                    output_files << targets[i]
-                  end
-              end
-
-              input_obj.cleanup
+              do_build(targets, filename)
             end
             if info['is_paginated']
               if !paginated_source_files[type]; paginated_source_files[type] = []; end
               paginated_source_files[type] << targets
-            end
-            if info['rsync']
-              if !rsync_files_by_target[info['rsync']]; rsync_files_by_target[info['rsync']] = []; end
-              rsync_files_by_target[info['rsync']] << targets
             end
           end
         end
@@ -159,6 +123,8 @@ class FileProcessor
   end
 
   def construct_filters_and_targets(filename, info, match_data)
+    input = nil; output = nil
+
     extension = File.extname((filename.instance_of? Array) ? filename[0] : filename).downcase
 
     case extension
@@ -189,5 +155,46 @@ class FileProcessor
     targets = output_obj.targets(build_filename_parts(match_data))
 
     [ input_obj, output_obj, targets ]
+  end
+
+  def file_mtime(file)
+    File.mtime(file)
+  end
+
+  def determine_rebuild(targets, filename)
+    rebuild = false
+
+    [ targets ].flatten.each do |t|
+      if !File.exists?(t)
+        rebuild = true
+        break
+      else
+        [ filename ].flatten.each do |f|
+          if File.basename(f) != "blank"
+            if file_mtime(f) > file_mtime(t)
+              rebuild = true
+              break
+            end
+          end
+        end
+      end
+    end
+
+    rebuild
+  end
+
+  def do_build(targets, filename, input_obj, output_obj)
+    tmp_files = input_obj.build(filename)
+
+    case tmp_files.class.to_s
+      when "String"
+        output_obj.build(tmp_files, targets)
+      when "Array"
+        [0, 1].each do |i|
+          output_obj.build(tmp_files[i], targets[i], (i == 0) ? "left" : "right")
+        end
+    end
+
+    input_obj.cleanup
   end
 end

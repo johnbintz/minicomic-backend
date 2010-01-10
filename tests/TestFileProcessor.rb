@@ -1,5 +1,6 @@
 require 'rubygems'
 require 'test/unit'
+require 'fakefs/safe'
 Dir[File.dirname(__FILE__) + '/../classes/*'].each do |f|
   require f
 end
@@ -113,6 +114,67 @@ class TestFileProcessor < Test::Unit::TestCase
       expected_return[1].any_instance.expects(:targets).with('parts').returns('target')
 
       file_processor.construct_filters_and_targets(filename, info, match_data)
+    end
+  end
+
+  def test_determine_rebuild
+    [
+      [ [], 'source', false ],
+      [ [ 'r-test3' ], 'source', true ],
+      [ [ 'r-test' ], 'source', true ],
+      [ [ 'r-test2' ], 'source', false ],
+      [ [ 'r-test2' ], 'blank', false ],
+    ].each do |targets, filename, expected_return|
+      file_processor = FileProcessor.new({})
+
+      class << file_processor
+        def file_mtime(file)
+          case file
+            when 'r-test'
+              return 1
+            when 'source'
+              return 2
+            when 'r-test2'
+              return 3
+          end
+        end
+      end
+
+      FakeFS do
+        FileUtils.touch [ 'r-test', 'r-test2', 'source' ]
+        assert_equal expected_return, file_processor.determine_rebuild(targets, filename)
+      end
+    end
+  end
+
+  def test_do_build
+    [
+      [ 'target', 'input', 'return' ],
+      [ [ 'target1', 'target2' ], 'input', [ 'return1', 'return2' ] ]
+    ].each do |targets, filename, input_obj_build_return|
+      input = Class.new do
+        def build(filename); end
+      end.new
+
+      output = Class.new do
+        def build(filename); end
+      end.new
+
+      input.expects(:build).with(filename).returns(input_obj_build_return)
+
+      case input_obj_build_return.class.to_s
+        when "String"
+          output.expects(:build).with(input_obj_build_return, targets)
+        when "Array"
+          [0, 1].each do |i|
+            output.expects(:build).with(input_obj_build_return[i], targets[i], (i == 0) ? "left" : "right")
+          end
+      end
+
+      input.expects(:cleanup)
+
+      file_processor = FileProcessor.new({})
+      file_processor.do_build(targets, filename, input, output)
     end
   end
 end
