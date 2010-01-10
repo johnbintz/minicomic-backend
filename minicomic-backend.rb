@@ -3,12 +3,14 @@
 require 'yaml'
 require 'time'
 
-Dir[File.dirname(__FILE__) + "/classes/*.rb"].each do |file|
-  require file
-end
+THIS_FILE = File.symlink?(__FILE__) ? File.readlink(__FILE__) : __FILE__
 
-any_rebuilt = false
-any_rsync = false
+%w(classes modules).each do |which|
+  p File.dirname(THIS_FILE) + "/#{which}/*.rb"
+  Dir[File.dirname(THIS_FILE) + "/#{which}/*.rb"].each do |file|
+    require file
+  end
+end
 
 if !ARGV[0]
   puts "Usage: #{File.basename(__FILE__)} <path to YAML file>"
@@ -20,7 +22,8 @@ if !File.exists?(ARGV[0])
   exit 1
 end
 
-if global['use_git']
-  system("git add .")
-  system("git commit -a")
-end
+config_loader = ConfigLoader.new
+config = config_loader.load(ARGV[0])
+
+file_processor = FileProcessor.new(config)
+file_processor.process

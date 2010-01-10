@@ -1,8 +1,9 @@
 require File.dirname(__FILE__) + '/../modules/PrintHandling.rb'
+require File.dirname(__FILE__) + '/../modules/ImageProcessing.rb'
 require File.dirname(__FILE__) + '/InputFilter.rb'
 
 class SVGToTempBitmap < InputFilter
-  include PrintHandling
+  include PrintHandling, ImageProcessing
 
   #
   # select which build method to use based on the number of provided images.
@@ -16,7 +17,7 @@ class SVGToTempBitmap < InputFilter
   #
   def single(input)
     filename = Dir.pwd + '/' + @output_filename
-    inkscape(input, filename)
+    inkscape(Dir.pwd + '/' + input, filename)
     @cleanup << filename
 
     if @config['spread']

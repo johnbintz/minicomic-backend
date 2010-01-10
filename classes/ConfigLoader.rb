@@ -50,7 +50,7 @@ class ConfigLoader
       if global['match']
         re = Regexp.new(global['match'])
 
-        files = Dir[global['path']].sort.collect do |filename|
+        files = Dir[global['path'] + '/*'].sort.collect do |filename|
           if matches = re.match(filename)
             filename
           end

@@ -7,11 +7,8 @@ class FileProcessor
     @paginated_source_files = {}
   end
 
-
   def process
-    rsync_files_by_target = {}
-
-    files.each do |filename|
+    @config['Global']['files'].each do |filename|
       ok, fileinfo, filename = verify_filename(filename)
 
       if ok
@@ -23,7 +20,7 @@ class FileProcessor
           if type != "Global"
             fileinfo_key = (filename.instance_of? Array) ? filename.join(",") : filename
 
-            file_fileinfo = (fileinfo_by_file[fileinfo_key]) ? fileinfo_by_file[fileinfo_key] : {}
+            file_fileinfo = (@config['Global']['fileinfo_by_file'][fileinfo_key]) ? @config['Global']['fileinfo_by_file'][fileinfo_key] : {}
 
             file_fileinfo = info.dup.merge(fileinfo).merge(file_fileinfo)
 
@@ -36,11 +33,11 @@ class FileProcessor
               puts "  Using #{filename} as a source"
               puts "  and writing to #{targets.inspect}"
 
-              do_build(targets, filename)
+              do_build(targets, filename, input_obj, output_obj)
             end
             if info['is_paginated']
-              if !paginated_source_files[type]; paginated_source_files[type] = []; end
-              paginated_source_files[type] << targets
+              if !@paginated_source_files[type]; @paginated_source_files[type] = []; end
+              @paginated_source_files[type] << targets
             end
           end
         end
@@ -57,10 +54,6 @@ class FileProcessor
         output_obj.config = info.dup
 
         output_obj.paginate(paginated_source_files[type].flatten)
-      end
-
-      if info['rsync']
-        system("echo '#{rsync_files_by_target[info['rsync']].join("\n")}' | rsync -vru --files-from=- . #{info['rsync']}")
       end
     end
   end
