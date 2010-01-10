@@ -42,7 +42,7 @@ class FileProcessor
           end
         end
 
-        page_index += 1
+        @page_index += 1
       end
     end
 
