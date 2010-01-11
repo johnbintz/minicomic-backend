@@ -54,7 +54,7 @@ class ConfigLoader
           if matches = re.match(filename)
             filename
           end
-        end
+        end.compact
       end
     end
 

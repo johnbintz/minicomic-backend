@@ -65,6 +65,8 @@ class TestFilter < Test::Unit::TestCase
       [ 'test4' ].each do |file|
         assert File.exists? file
       end
+
+      [ 'test', 'test3', 'test4' ].each { |f| FileUtils.rm f }
     end
   end
 

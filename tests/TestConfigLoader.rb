@@ -35,7 +35,7 @@ class TestConfigLoader < Test::Unit::TestCase
       [
         {
           'Global' => {
-            'path' => '*.svg',
+            'path' => '.',
             'match' => '.*\.svg',
             'page_index_format' => '%02d'
           },
@@ -45,7 +45,7 @@ class TestConfigLoader < Test::Unit::TestCase
         },
         {
           'Global' => {
-            'path' => '*.svg',
+            'path' => '.',
             'match' => '.*\.svg',
             'page_index_format' => '%02d',
             'files' => [ Dir.pwd + '/test1.svg', Dir.pwd + '/test2.svg' ],
@@ -178,6 +178,10 @@ class TestConfigLoader < Test::Unit::TestCase
         end
 
         assert_equal expected_result, @config_loader.load('file')
+
+        if files
+          files.each { |f| FileUtils.rm f }
+        end
       end
     end
   end
@@ -189,6 +193,8 @@ class TestConfigLoader < Test::Unit::TestCase
       end
 
       assert_equal %w(one two three), @config_loader.load_yaml('test')
+
+      FileUtils.rm 'test'
     end
   end
 
@@ -196,6 +202,7 @@ class TestConfigLoader < Test::Unit::TestCase
     FakeFS do
       FileUtils.touch [ 'test', 'test2', 'test3' ]
       assert_equal '%01d', @config_loader.count_pattern('*')
+      [ 'test', 'test2', 'test3' ].each { |f| FileUtils.rm f }
     end
   end
 end

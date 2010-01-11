@@ -71,7 +71,7 @@ class TestSVGToTempBitmap < Test::Unit::TestCase
 
   def test_single_no_spread
     @filter.output_filename = 'test'
-    @filter.expects(:inkscape).with('file', Dir.pwd + '/test')
+    @filter.expects(:inkscape).with(Dir.pwd + '/file', Dir.pwd + '/test')
     assert_equal Dir.pwd + '/test', @filter.single('file')
     assert_equal [ Dir.pwd + '/test' ], @filter.cleanup
   end
@@ -83,7 +83,7 @@ class TestSVGToTempBitmap < Test::Unit::TestCase
       'spread' => true
     }
 
-    @filter.expects(:inkscape).with('file', Dir.pwd + '/test')
+    @filter.expects(:inkscape).with(Dir.pwd + '/file', Dir.pwd + '/test')
     @filter.expects(:build_spread).with(Dir.pwd + '/test').returns(['target1', 'target2'])
 
     @filter.single('file')

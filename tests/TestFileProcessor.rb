@@ -143,6 +143,7 @@ class TestFileProcessor < Test::Unit::TestCase
       FakeFS do
         FileUtils.touch [ 'r-test', 'r-test2', 'source' ]
         assert_equal expected_return, file_processor.determine_rebuild(targets, filename)
+        [ 'r-test', 'r-test2', 'source' ].each { |f| FileUtils.rm f }
       end
     end
   end

@@ -46,6 +46,26 @@ class Scheduler
 
       breaks = parameters['breaks'] || []
 
+      all_strings = true
+      parameters['interval'].each do |i|
+        if !i.is_a? String
+          all_strings = false
+          break
+        end
+      end
+
+      if all_strings
+        parameters['interval'].each_index do |i|
+          interval = parameters['interval'].shift
+          if current == skip_to_dow(current, interval)
+            parameters['interval'].unshift(interval)
+            break
+          else
+            parameters['interval'].push(interval)
+          end
+        end
+      end
+
       index = 0
       while dates.length < to_produce
         interval = parameters['interval'].shift

@@ -22,16 +22,11 @@ class TestTempBitmapToWeb < Test::Unit::TestCase
     end
   end
 
-  def test_requires_schedule
-    @filter.requires_schedule('test')
-    assert_equal 'test', @filter.schedule
-  end
-
   def test_filename
-    @filter.schedule = [ Date.parse('2010-01-01') ]
     @filter.config = {
       'target' => 'test{date}',
-      'date_format' => '%Y-%m-%d'
+      'date_format' => '%Y-%m-%d',
+      'publish_dates' => [ Date.parse('2010-01-01') ]
     }
     assert_equal 'test2010-01-01', @filter.filename({'index' => 0})
   end
