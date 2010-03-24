@@ -68,7 +68,7 @@ class ConfigLoader
       if type != "Global"
         if info['schedule']
           info['publish_dates'] = scheduler.schedule(info['schedule'], files.length)
-        end
+        end        
       end
     end
 

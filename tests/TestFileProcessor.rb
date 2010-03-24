@@ -1,7 +1,7 @@
 require 'rubygems'
 require 'test/unit'
 require 'fakefs/safe'
-Dir[File.dirname(__FILE__) + '/../classes/*'].each do |f|
+Dir[File.dirname(__FILE__) + '/../classes/*.rb'].each do |f|
   require f
 end
 

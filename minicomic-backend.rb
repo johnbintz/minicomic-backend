@@ -3,10 +3,9 @@
 require 'yaml'
 require 'time'
 
-THIS_FILE = File.symlink?(__FILE__) ? File.readlink(__FILE__) : __FILE__
+THIS_FILE = File.symlink?(__FILE__) ? File.expand_path(File.readlink(__FILE__)) : File.expand_path(__FILE__)
 
 %w(classes modules).each do |which|
-  p File.dirname(THIS_FILE) + "/#{which}/*.rb"
   Dir[File.dirname(THIS_FILE) + "/#{which}/*.rb"].each do |file|
     require file
   end
