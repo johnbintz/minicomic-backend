@@ -1,7 +1,5 @@
-require 'rubygems'
-require 'test/unit'
-require 'fakefs/safe'
-require File.dirname(__FILE__) + '/../classes/Filter.rb'
+require 'test_helper'
+require 'minicomic-backend/filter'
 
 class TestFilter < Test::Unit::TestCase
   def setup

@@ -1,7 +1,5 @@
-require 'rubygems'
-require 'test/unit'
-require 'mocha'
-require File.dirname(__FILE__) + '/../classes/OutputFilter.rb'
+require 'test_helper'
+require 'minicomic-backend/output_filter'
 
 class TestOutputFilter < Test::Unit::TestCase
   def setup

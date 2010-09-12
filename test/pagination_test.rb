@@ -1,6 +1,5 @@
-require 'rubygems'
-require 'test/unit'
-require File.dirname(__FILE__) + '/../modules/Pagination.rb'
+require 'test_helper'
+require 'minicomic-backend/pagination'
 
 class TestPagination < Test::Unit::TestCase
   def setup

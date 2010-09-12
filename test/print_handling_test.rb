@@ -1,8 +1,5 @@
-require 'rubygems'
-require 'test/unit'
-require 'mocha'
-require 'fakefs/safe'
-require File.dirname(__FILE__) + '/../modules/PrintHandling.rb'
+require 'test_helper'
+require 'minicomic-backend/print_handling'
 
 class TestPrintHandling < Test::Unit::TestCase
   def setup

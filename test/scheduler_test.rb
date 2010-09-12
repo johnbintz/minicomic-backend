@@ -1,6 +1,5 @@
-require 'rubygems'
-require 'test/unit'
-require File.dirname(__FILE__) + '/../classes/Scheduler.rb'
+require 'test_helper'
+require 'minicomic-backend/scheduler'
 
 class TestScheduler < Test::Unit::TestCase
   def setup

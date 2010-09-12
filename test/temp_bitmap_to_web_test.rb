@@ -1,7 +1,5 @@
-require 'rubygems'
-require 'test/unit'
-require 'mocha'
-require File.dirname(__FILE__) + '/../classes/TempBitmapToWeb.rb'
+require 'test_helper'
+require 'minicomic-backend/temp_bitmap_to_web'
 
 class TestTempBitmapToWeb < Test::Unit::TestCase
   def setup
@@ -30,5 +28,4 @@ class TestTempBitmapToWeb < Test::Unit::TestCase
     }
     assert_equal 'test2010-01-01', @filter.filename({'index' => 0})
   end
-
 end

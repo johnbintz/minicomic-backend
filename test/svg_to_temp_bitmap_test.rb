@@ -1,7 +1,5 @@
-require 'rubygems'
-require 'test/unit'
-require 'fakefs/safe'
-require File.dirname(__FILE__) + '/../classes/SVGToTempBitmap.rb'
+require 'test_helper'
+require 'minicomic-backend/svg_to_temp_bitmap'
 
 class TestSVGToTempBitmap < Test::Unit::TestCase
   def setup

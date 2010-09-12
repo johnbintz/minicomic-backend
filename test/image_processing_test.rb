@@ -1,8 +1,4 @@
-require 'rubygems'
-require 'test/unit'
-require 'mocha'
-require 'fakefs/safe'
-require File.dirname(__FILE__) + '/../modules/ImageProcessing.rb'
+require 'minicomic-backend/image_processing'
 
 class TestImageProcessing < Test::Unit::TestCase
   def setup
