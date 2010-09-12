@@ -1,8 +1,6 @@
-require 'rubygems'
-require 'test/unit'
-require 'mocha'
-require File.dirname(__FILE__) + '/../classes/ConfigLoader.rb'
-require File.dirname(__FILE__) + '/../classes/Scheduler.rb'
+require 'test_helper'
+require 'minicomic-backend/config_loader'
+require 'minicomic-backend/scheduler'
 
 class TestConfigLoader < Test::Unit::TestCase
   def setup

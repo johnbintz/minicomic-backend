@@ -1,9 +1,9 @@
-require 'rubygems'
-require 'test/unit'
-require 'fakefs/safe'
-Dir[File.dirname(__FILE__) + '/../classes/*.rb'].each do |f|
-  require f
-end
+require 'test_helper'
+require 'minicomic-backend/file_processor'
+require 'minicomic-backend/svg_to_temp_bitmap'
+require 'minicomic-backend/temp_bitmap_to_web'
+require 'minicomic-backend/temp_bitmap_to_print'
+require 'minicomic-backend/temp_bitmap_to_paginated_print'
 
 class TestFileProcessor < Test::Unit::TestCase
   def test_verify_filename
